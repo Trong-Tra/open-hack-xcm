@@ -2,96 +2,42 @@
 
 ## Challenges
 
-### Challenge 1: Interact with PolkadotJS Apps
+### Challenge 1: Teleport PASEO Tokens from Relay Chain to a Parachain
 
-- Teleport PASEO tokens from Relaychain to Parachain.
-- Reserve transfer PASEO tokens from System Parachain - Asset Hub to Parachain.
+#### 📝 Description
+In this challenge, you will **teleport** PASEO tokens from the Polkadot Relay Chain to a specified parachain using the Polkadot API library. Teleportation is a trustless asset transfer where the Relay Chain burns the tokens, and the parachain mints an equivalent amount.
 
-### Typescript Example code
+#### ✅ Task
+- Use the **Polkadot API** to construct an XCM transaction that teleports PASEO from the **Relay Chain** to a given **Parachain**.
+- Execute the transaction using a Polkadot wallet or a frontend UI that supports XCM.
+- Verify that the PASEO tokens arrive at the parachain account.
 
-```ts
-/**
- * Reverse transfer from a system parachain to a parachain on the same network.
- * Connected wallet must be on the system parachain.
- *
- * @param para Destination parachain ID.
- * @param amount Amount of tokens sent to the recipient account.
- * @param beneficiary Address of the recipient account on the destination parachain.
- * @returns
- */
-export const systemParaToParaPayload = (
-  para: number,
-  amount: bigint,
-  beneficiary: SS58String
-) => {
-  return {
-    // Get the parachain sibling of the system parachain under the relaychain.
-    dest: XcmVersionedLocation.V3({
-      parents: 1,
-      interior: parachainJunction(para),
-    }),
-    // Get the account on the parachain.
-    beneficiary: XcmVersionedLocation.V3({
-      parents: 0,
-      interior: parachainAccountJunction(beneficiary!),
-    }),
-    assets: XcmVersionedAssets.V3([
-      {
-        id: XcmV3MultiassetAssetId.Concrete({
-          parents: 0,
-          interior: XcmV3Junctions.Here(),
-        }),
-        fun: XcmV3MultiassetFungibility.Fungible(amount),
-      },
-    ]),
-  };
-};
+---
 
-/**
- * Teleport asset from a relaychain to a parachain. Connected wallet must be on the relaychain.
- *
- * @param para Destination parachain ID.
- * @param amount Amount of tokens sent to the recipient account.
- * @param beneficiary Address of the recipient account on the destination parachain.
- * @returns
- */
-export const relayToParaPayload = (
-  para: number,
-  amount: bigint,
-  beneficiary: SS58String
-) => {
-  return {
-    // Parachain under the relaychain network.
-    dest: XcmVersionedLocation.V3({
-      parents: 0,
-      interior: parachainJunction(para),
-    }),
-    // Account on the parachain.
-    beneficiary: XcmVersionedLocation.V3({
-      parents: 0,
-      interior: parachainAccountJunction(beneficiary!),
-    }),
-    // Native asset on the relaychain.
-    assets: XcmVersionedAssets.V3([
-      {
-        id: XcmV3MultiassetAssetId.Concrete({
-          parents: 0,
-          interior: XcmV3Junctions.Here(),
-        }),
-        fun: XcmV3MultiassetFungibility.Fungible(amount),
-      },
-    ]),
-  };
-};
-```
+### Challenge 2: Reserve Transfer PASEO Tokens from Asset Hub to the People Chain
 
-## Tips & tricks
-### Convert multi-locations to human readable format (URLS)
+#### 📝 Description
+This challenge requires you to perform a **reserve-based transfer** of PASEO tokens. Unlike teleportation, a reserve transfer does not burn tokens but instead moves them under the control of the destination chain.
 
-Visit the site https://playground.paraspell.xyz/xcm-analyser
+#### ✅ Task
+- Construct an XCM transaction using **Polkadot API** to **transfer** PASEO from **Asset Hub** to the **People Chain**.
+- Ensure the correct XCM instructions are used (`WithdrawAsset`, `BuyExecution`, `DepositReserveAsset`).
+- Submit the transaction and verify the token balance on the People Chain.
 
-Below is the example of a multi-location in JSON format:
+---
 
+## 🎯 Tips & Tricks
+
+### 🔍 Convert Multi-Locations to Human-Readable Format
+
+#### **Why is this useful?**
+XCM messages use **multi-locations** to define assets and destinations. Understanding these formats helps in debugging and structuring correct transactions.
+
+#### **Tool**
+Visit [Paraspell XCM Playground](https://playground.paraspell.xyz/xcm-analyser) to convert multi-locations into human-readable formats.
+
+#### **Example**
+Given this **multi-location JSON**:
 ```json
 {
     "parents": 1,
@@ -101,10 +47,3 @@ Below is the example of a multi-location in JSON format:
         }
     }
 }
-```
-
-Copy the JSON data and paste it into the Playground to see the human-readable format.
-
-```
-"../Parachain(1000)"
-```
