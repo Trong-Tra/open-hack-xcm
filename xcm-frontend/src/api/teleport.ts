@@ -1,5 +1,5 @@
 import { AccountId, Binary, SS58String } from "polkadot-api";
-import { paraChain, paseoAssetHubChainApi } from "./asset-hub-chain";
+import { paraChain, paseoAssetHubChainApi, PASEO_ASSET_HUB_CHAIN_ID } from "./asset-hub-chain";
 import {
   paseo,
   paseo_asset_hub,
@@ -13,6 +13,7 @@ import {
   XcmV3WeightLimit,
 } from "@polkadot-api/descriptors";
 import { paseoRelayChainApi, relayChain } from "./relay-chain";
+import { PASEO_PEOPLE_CHAIN_ID, paseoPeopleChainId } from "./people-chain";
 
 export const reserveTransferToParachain = (
   recipientAddress: SS58String,
@@ -21,7 +22,7 @@ export const reserveTransferToParachain = (
   const xcmTransaction = paseoAssetHubChainApi.tx.PolkadotXcm.reserve_transfer_assets({
     dest: XcmVersionedLocation.V4({
       parents: 0,
-      interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(1000)),
+      interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(PASEO_PEOPLE_CHAIN_ID)),
     }),
     beneficiary: createBeneficiary(recipientAddress),
     assets: createNativeAsset(0, transferAmount),
@@ -35,7 +36,7 @@ export const teleportToParaChain = (recipientAddress: SS58String, transferAmount
   const xcmTransaction = paseoRelayChainApi.tx.XcmPallet.transfer_assets({
     dest: XcmVersionedLocation.V4({
       parents: 0,
-      interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(1000)),
+      interior: XcmV3Junctions.X1(XcmV3Junction.Parachain(PASEO_PEOPLE_CHAIN_ID)),
     }),
     beneficiary: createBeneficiary(recipientAddress),
     assets: createNativeAsset(0, transferAmount),
@@ -50,8 +51,7 @@ export const teleportToRelayChain = (
   recipientAddress: SS58String,
   transferAmount: bigint
 ): any => {
-  // TODO: Implement a logic to teleport to relaychain
-  const xcmTransaction = paseoAssetHubChainApi.tx.PolkadotXcm.reserve_transfer_assets({
+  const xcmTransaction = paseoPeopleChainId.tx.PolkadotXcm.limited_teleport_assets({
     dest: XcmVersionedLocation.V4({
       parents: 1,
       interior: XcmV3Junctions.Here(),
@@ -59,6 +59,7 @@ export const teleportToRelayChain = (
     beneficiary: createBeneficiary(recipientAddress),
     assets: createNativeAsset(1, transferAmount),
     fee_asset_item: 0,
+    weight_limit: XcmV3WeightLimit.Unlimited(),
   });
 
   return xcmTransaction;
